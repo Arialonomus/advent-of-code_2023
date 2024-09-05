@@ -9,7 +9,8 @@ import argparse
 import re
 
 # Parse arguments
-parser = argparse.ArgumentParser(description="A solution to Advent of Code '23 puzzle 'Trebuchet!?' Part 1.")
+parser = argparse.ArgumentParser(
+    description="A solution to Advent of Code '23 puzzle 'Trebuchet!?'")
 parser.add_argument('input_file',
                     type=argparse.FileType('r'),
                     help="Input file path")
