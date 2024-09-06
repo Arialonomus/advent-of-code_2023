@@ -1,5 +1,6 @@
-# Input files
+# Input & output files
 input*
+output*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
