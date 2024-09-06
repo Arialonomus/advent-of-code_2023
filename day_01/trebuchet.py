@@ -6,7 +6,7 @@ Solution by Jacob Barber
 """
 
 import argparse
-import re
+import regex
 from utils_day_01 import name_to_digit
 
 # Parse arguments
@@ -23,19 +23,18 @@ with args.input_file as file:
     for line in file:
         # Parse digits in line into list
         pattern = r'\d|one|two|three|four|five|six|seven|eight|nine'
-        digits = re.findall(pattern, line)
+        digits = regex.findall(pattern, line, overlapped=True)
 
         # Select first and last digits (same if only 1 digit present)
         first = digits[0]
         if len(first) > 1:
             first = name_to_digit(first)
-        last = digits[len(digits) - 1]
+        last = digits[-1]
         if len(last) > 1:
             last = name_to_digit(last)
 
         # Combine digits into calibration value and add to sum
         digit_str = first + last
-        print(str(digits) + ' ' + digit_str)
         sum += int(digit_str)
 
 # Print the sum of the digits in each line
