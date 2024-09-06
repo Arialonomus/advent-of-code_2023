@@ -23,8 +23,8 @@ with args.input_file as file:
     for line in file:
         # Split string into ID and rounds
         line = line.strip()
-        game_str, rounds_str = line.split(": ")
-        game_id = int(game_str.strip("Game "))
+        id_str, rounds_str = line.split(": ")
+        id = int(id_str.strip("Game "))
         rounds_list = rounds_str.split("; ")
 
         # Process each round to check if game is possible
@@ -49,6 +49,6 @@ with args.input_file as file:
                 break
 
         if is_possible:
-            sum_ids += game_id
+            sum_ids += id
 
 print(sum_ids)

@@ -18,7 +18,7 @@ with args.input_file as file:
     for line in file:
         # Split string into ID and rounds
         line = line.strip()
-        game_str, rounds_str = line.split(": ")
+        id_str, rounds_str = line.split(": ")
         rounds_list = rounds_str.split("; ")
 
         # Loop through rounds to calculate the smallest possible value for each color
