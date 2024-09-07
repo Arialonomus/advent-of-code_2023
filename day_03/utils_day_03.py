@@ -42,8 +42,8 @@ def check_part_num(schematic, start_row, num_rows, start_col, num_cols, part_lis
             is_valid = check_cell(schematic[cur_row - 1][cur_col])
 
         # Check below adjacency
-        if not is_valid and cur_col < num_cols - 1:
-            is_valid = check_cell(schematic[cur_row][cur_col + 1])
+        if not is_valid and cur_row < num_rows - 1:
+            is_valid = check_cell(schematic[cur_row + 1][cur_col])
 
         # Add the digit to the part number string
         part_num_str += schematic[cur_row][cur_col]
