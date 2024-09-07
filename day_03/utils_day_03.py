@@ -29,24 +29,24 @@ def check_part_num(schematic, start_row, num_rows, start_col, num_cols, part_lis
 
     # Check left adjacency
     if not is_valid and cur_col > 0:
-        check_cell(schematic[cur_row][cur_col - 1])
+        is_valid = check_cell(schematic[cur_row][cur_col - 1])
 
     # Check lower-left adjacency
     if not is_valid and cur_row < num_rows - 1 and cur_col > 0:
-        check_cell(schematic[cur_row + 1][cur_col - 1])
+        is_valid = check_cell(schematic[cur_row + 1][cur_col - 1])
 
     # Iterate through the remaining digits, checking adjacent cells
     while not is_last_digit:
         # Check above adjacency
         if not is_valid and cur_row > 0:
-            check_cell(schematic[cur_row - 1][cur_col])
+            is_valid = check_cell(schematic[cur_row - 1][cur_col])
 
         # Check below adjacency
         if not is_valid and cur_col < num_cols - 1:
-            check_cell(schematic[cur_row][cur_col + 1])
+            is_valid = check_cell(schematic[cur_row][cur_col + 1])
 
         # Add the digit to the part number string
-        part_num_str += (schematic[start_row][start_col])
+        part_num_str += schematic[cur_row][cur_col]
 
         # Check if digit is last digit in number
         if cur_col < num_cols - 1 and schematic[cur_row][cur_col + 1].isdigit():
@@ -60,11 +60,11 @@ def check_part_num(schematic, start_row, num_rows, start_col, num_cols, part_lis
 
             # Check right adjacency
             if not is_valid and cur_col < num_cols - 1:
-                check_cell(schematic[cur_row][cur_col + 1])
+                is_valid = check_cell(schematic[cur_row][cur_col + 1])
 
             # Check lower-right adjacency
             if not is_valid and cur_row < num_rows - 1 and cur_col < num_cols - 1:
-                check_cell(schematic[cur_row + 1][cur_col + 1])
+                is_valid = check_cell(schematic[cur_row + 1][cur_col + 1])
 
     # If valid, add number to part list and return col position of last digit
     if is_valid:
