@@ -1,6 +1,6 @@
 """
 Advent of Code 2023
-Day 3 - Gear Ratios (Part 1)
+Day 3 - Gear Ratios (Part 2)
 
 Solution by Jacob Barber
 """
