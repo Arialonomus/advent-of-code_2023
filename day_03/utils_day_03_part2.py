@@ -1,14 +1,3 @@
-def check_cell(cell_contents):
-    """
-    Checks the passed in contents of a cell to determine if it is a gear.
-    Returns true if so, otherwise returns false.
-    """
-    if cell_contents == '*':
-        return True
-    else:
-        return False
-
-
 def check_part_num(schematic, start_row, num_rows, start_col, num_cols, gear_list):
     """
     Checks to see if part number is adjacent to a gear. If so adds it to the gear_list
