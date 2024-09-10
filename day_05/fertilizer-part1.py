@@ -16,15 +16,14 @@ with args.input_file as file:
 
     # Construct the almanac by parsing the remainder of the file
     almanac = []
-    file.readline()         # Consume newline for first mapping
-    line = file.readline()  # Read in first header
+    line = file.readline()      # Consume newline for first mapping
     # Read in lines until EOF
     while line != '':
-        mapping_title = line.rstrip(" map:\n")
+        mapping_title = file.readline().rstrip(" map:\n")
         mapping = []
         line = file.readline()  # Read first mapping line
         # Parse each mapping line into tuple of range start, range end, and function map
-        while line != '\n':
+        while line != '\n' and line != '':
             destination, source, range_len = list(map(int, line.rstrip().split()))
             mapping.append((source, source + range_len, destination - source))
             line = file.readline()
@@ -32,4 +31,3 @@ with args.input_file as file:
             'title': mapping_title,
             'mapping': sorted(mapping)
         })
-        line = file.readline() # Read next header, or EOF
