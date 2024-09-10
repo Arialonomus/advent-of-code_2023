@@ -31,3 +31,21 @@ with args.input_file as file:
             'title': mapping_title,
             'mapping': sorted(mapping)
         })
+
+    # Calculate the locations for each seed
+    locations = initial_seeds
+    for entry in almanac:
+        for i in range(0, len(locations)):
+            mapping_found = False
+            j = 0
+            while j < len(entry['mapping']) and not mapping_found:
+                mapping = entry['mapping'][j]
+                if mapping[1] > locations[i] >= mapping[0]:
+                    locations[i] += mapping[2]
+                    mapping_found = True
+                else:
+                    j += 1
+
+    # Determine and print the lowest location
+    lowest_location = min(locations)
+    print(lowest_location)
