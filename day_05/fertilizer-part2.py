@@ -14,14 +14,14 @@ with args.input_file as file:
     # Parse the list of seed ranges
     initial_seeds = list(map(int, file.readline().rstrip().strip("seeds: ").split()))
     seed_ranges = []
-    i = 0
-    while i < len(initial_seeds) - 1:
-        seed_ranges.append((initial_seeds[i], initial_seeds[i] + initial_seeds[i + 1]))
-        i += 2
+    j = 0
+    while j < len(initial_seeds) - 1:
+        seed_ranges.append((initial_seeds[j], initial_seeds[j] + initial_seeds[j + 1]))
+        j += 2
 
     # Construct the almanac by parsing the remainder of the file
     almanac = []
-    line = file.readline()      # Consume newline for first mapping
+    line = file.readline()      # Consume newline before first mapping
     # Read in lines until EOF
     while line != '':
         mapping_title = file.readline().rstrip(" map:\n")
@@ -38,18 +38,23 @@ with args.input_file as file:
         })
 
     # Calculate the locations for each seed
-    locations = initial_seeds
-    for entry in almanac:
-        for i in range(0, len(locations)):
-            mapping_found = False
-            j = 0
-            while j < len(entry['mapping']) and not mapping_found:
-                mapping = entry['mapping'][j]
-                if mapping[1] > locations[i] >= mapping[0]:
-                    locations[i] += mapping[2]
-                    mapping_found = True
-                else:
-                    j += 1
+    locations = []
+    for i in range(0, len(seed_ranges)):
+        seed_range = seed_ranges[i]
+        locations.append(seed_range[0])
+        for seed in range(seed_range[0], seed_range[1]):
+            for entry in almanac:
+                mapping_found = False
+                j = 0
+                while j < len(entry['mapping']) and not mapping_found:
+                    mapping = entry['mapping'][j]
+                    if mapping[1] > seed >= mapping[0]:
+                        seed += mapping[2]
+                        mapping_found = True
+                    else:
+                        j += 1
+            if seed < locations[i]:
+                locations[i] = seed
 
     # Determine and print the lowest location
     lowest_location = min(locations)
