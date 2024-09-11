@@ -24,7 +24,7 @@ def find_hand_type(hand):
     Takes in a string representing a Camel Card hand and
     returns an integer representing the hand type (see above)
     """
-    # Determine the counts for each card in the hand
+    # Calculate the counts for each card in the hand
     card_count = {}
     for card in hand:
         if card not in card_count:
@@ -33,33 +33,32 @@ def find_hand_type(hand):
             card_count[card] += 1
 
     # Determine the type based on the card count
-    # Five of a Kind
     if any(count == 5 for count in card_count.values()):
+        # Five of a Kind
         return 6
 
-    # Four of a Kind
     if any(count == 4 for count in card_count.values()):
+        # Four of a Kind
         return 5
 
-    # Four of a Kind
+    num_pairs = sum(1 for count in card_count.values() if count == 2)
     if any(count == 3 for count in card_count.values()):
-        # Full House
-        if any(count == 2 for count in card_count.values()):
+        if num_pairs == 1:
+            # Full House
             return 4
         # Three of a Kind
-        else:
-            return 3
+        return 3
 
-    num_pairs = sum(1 for count in card_count.values() if count == 2)
-    # Two Pair
     if num_pairs == 2:
+        # Two Pair
         return 2
-    # One Pair
+
     if num_pairs == 1:
+        # One Pair
         return 1
+
     # High Card
-    else:
-        return 0
+    return 0
 
 def get_value(card):
     """
