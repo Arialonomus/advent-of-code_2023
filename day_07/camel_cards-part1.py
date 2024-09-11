@@ -7,14 +7,16 @@ Solution by Jacob Barber
 
 from aoc_utils import get_args
 
+#* Helper Functions *#
+
 # Types of games correspond to a list index in the following order
-# 0 - Five of a Kind
-# 1 - Four of a Kind
-# 2 - Full House
+# 0 - High Card
+# 1 - One Pair
+# 2 - Two Pair
 # 3 - Three of a Kind
-# 4 - Two Pair
-# 5 - One Pair
-# 6 - High Card
+# 4 - Full House
+# 5 - Four of a Kind
+# 6 - Five of a Kind
 NUM_TYPES = 7
 
 def find_hand_type(hand):
@@ -33,17 +35,17 @@ def find_hand_type(hand):
     # Determine the type based on the card count
     # Five of a Kind
     if any(count == 5 for count in card_count.values()):
-        return 0
+        return 6
 
     # Four of a Kind
     if any(count == 4 for count in card_count.values()):
-        return 1
+        return 5
 
     # Four of a Kind
     if any(count == 3 for count in card_count.values()):
         # Full House
         if any(count == 2 for count in card_count.values()):
-            return 2
+            return 4
         # Three of a Kind
         else:
             return 3
@@ -51,13 +53,13 @@ def find_hand_type(hand):
     num_pairs = sum(1 for count in card_count.values() if count == 2)
     # Two Pair
     if num_pairs == 2:
-        return 4
+        return 2
     # One Pair
     if num_pairs == 1:
-        return 5
+        return 1
     # High Card
     else:
-        return 6
+        return 0
 
 def get_value(card):
     """
@@ -107,6 +109,8 @@ def sort_by_strength(games):
 
     return games
 
+#* Script *#
+
 # Parse arguments
 args = get_args(7, "Camel Cards (Part 1)")
 
@@ -116,6 +120,13 @@ with args.input_file as file:
     for line in file:
         hand, bid = line.split()
         games.append((hand, int(bid)))
+
+# Arrange games by type
+games_by_type = [[] for _ in range(NUM_TYPES)]
+for game in games:
+    hand = game[0]
+    type = find_hand_type(hand)
+    games_by_type[type].append(game)
 
 # Arrange games by type
 games_by_type = [[] for _ in range(NUM_TYPES)]
