@@ -128,13 +128,17 @@ for game in games:
     type = find_hand_type(hand)
     games_by_type[type].append(game)
 
-# Arrange games by type
-games_by_type = [[] for _ in range(NUM_TYPES)]
-for game in games:
-    hand = game[0]
-    type = find_hand_type(hand)
-    games_by_type[type].append(game)
-
 # Sort all the hands of a given type by strength
+# then combine into a single list of games sorted by rank
+games_by_rank = []
 for i in range(NUM_TYPES):
     games_by_type[i] = sort_by_strength(games_by_type[i])
+    games_by_rank += games_by_type[i]
+
+# Calculate and display the total winnings for all games
+total_winnings = 0
+for i in range(len(games_by_rank)):
+    bid = games_by_rank[i][1]
+    rank = i + 1
+    total_winnings += bid * rank
+print(total_winnings)
