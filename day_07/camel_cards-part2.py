@@ -24,7 +24,7 @@ def find_hand_type(hand):
     Takes in a string representing a Camel Card hand and
     returns an integer representing the hand type (see above)
     """
-    # Determine the counts for each card in the hand
+    # Calculate the counts for each card in the hand
     card_count = {}
     for card in hand:
         if card not in card_count:
@@ -32,10 +32,11 @@ def find_hand_type(hand):
         else:
             card_count[card] += 1
 
-    # Determine the number of jokers
-    num_jokers = 0
-    if 'J' in card_count.keys():
-        num_jokers = card_count['J']
+    # Retrieve the number of jokers and combine them with the highest card count
+    if 'J' in card_count.keys() and card_count['J'] != 5:
+        highest_count = max((key for key in card_count if key != 'J'), key=card_count.get)
+        card_count[highest_count] += card_count['J']
+        del card_count['J']
 
     # Determine the type based on the card count
     if any(count == 5 for count in card_count.values()):
@@ -43,20 +44,11 @@ def find_hand_type(hand):
         return 6
 
     if any(count == 4 for count in card_count.values()):
-        # Five of a Kind (1 or 4 Jokers)
-        if num_jokers == 1 or num_jokers == 4:
-            return 6
         # Four of a Kind
         return 5
 
     num_pairs = sum(1 for count in card_count.values() if count == 2)
     if any(count == 3 for count in card_count.values()):
-        if num_jokers == 2 or num_jokers == 3 and num_pairs == 1:
-            # Five of a Kind (2 or 3 Jokers)
-            return 6
-        if num_jokers == 1 or num_jokers == 3:
-            # Four of a Kind (1 or 3 Jokers)
-            return 5
         if num_pairs == 1:
             # Full House
             return 4
@@ -64,24 +56,11 @@ def find_hand_type(hand):
         return 3
 
     if num_pairs == 2:
-        # Four of a Kind (2 Jokers)
-        if num_jokers == 2:
-            return 5
-        # Full House (1 Joker)
-        if num_jokers == 1:
-            return 4
         # Two Pair
         return 2
 
     if num_pairs == 1:
-        # Three of a Kind (1 or 2 Jokers)
-        if num_jokers > 0:
-            return 3
         # One Pair
-        return 1
-
-    if num_jokers == 1:
-        # One Pair (1 Joker)
         return 1
 
     # High Card
