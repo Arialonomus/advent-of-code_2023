@@ -59,6 +59,54 @@ def find_hand_type(hand):
     else:
         return 6
 
+def get_value(card):
+    """
+    Returns the numerical value of a passed in card
+    """
+    match card:
+        case 'A':
+            return 14
+        case 'K':
+            return 13
+        case 'Q':
+            return 12
+        case 'J':
+            return 11
+        case 'T':
+            return 10
+        case _:
+            return int(card)
+
+def is_stronger(hand_a, hand_b):
+    """
+    Compares two passed in hands, and returns True if hand_a is
+    stronger than hand_b
+    """
+    for i in range(len(hand_a)):
+        card_a = get_value(hand_a[i])
+        card_b = get_value(hand_b[i])
+        if card_a == card_b:
+            continue
+        if card_a > card_b:
+            return True
+        if card_a < card_b:
+            return False
+
+def sort_by_strength(games):
+    """Takes in an unordered list of games (hands, bids) of the same type
+    and returns the list sorted from weakest to strongest hand"""
+    for i in range(len(games) - 1):
+        # Locate the index of the weakest hand in the sub array
+        weakest = i
+        for j in range(i + 1, len(games)):
+            if is_stronger(games[weakest][0], games[j][0]):
+                weakest = j
+
+        # Swap the weakest game with the first game in the subarray
+        games[i], games[weakest] = games[weakest], games[i]
+
+    return games
+
 # Parse arguments
 args = get_args(7, "Camel Cards (Part 1)")
 
@@ -75,3 +123,7 @@ for game in games:
     hand = game[0]
     type = find_hand_type(hand)
     games_by_type[type].append(game)
+
+# Sort all the hands of a given type by strength
+for i in range(NUM_TYPES):
+    games_by_type[i] = sort_by_strength(games_by_type[i])
