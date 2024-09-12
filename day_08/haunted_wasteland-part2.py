@@ -5,6 +5,7 @@ Day 8 - Haunted Wasteland (Part 2)
 Solution by Jacob Barber
 """
 
+import numpy as np
 from aoc_utils import get_args
 
 # Parse arguments
@@ -21,34 +22,33 @@ with args.input_file as file:
         desert_map[node] = (left, right)
 
 # Construct the list of starting nodes
-current_nodes = []
+starting_nodes = []
 for node in desert_map.keys():
     if node[2] == 'A':
-        current_nodes.append(node)
+        starting_nodes.append(node)
+num_starting_nodes = len(starting_nodes)
 
-# Traverse the map following the instructions, summing the number of steps
-at_destination = False
-num_steps = 0
-i = 0
-while not at_destination:
-    at_destination = True
-    instruction = instructions[i]
+# Each starting node only has one looping path,
+# count the number of steps for each path
+step_counts = []
+for starting_node in starting_nodes:
+    current_node = starting_node
+    num_steps = 0
+    ins_idx = 0
 
-    # Update all the current nodes
-    for j in range(len(current_nodes)):
-        node = current_nodes[j]
+    # Follow instructions until ending node is reached
+    while current_node[2] != 'Z':
+        instruction = instructions[ins_idx]
         if instruction == 'L':
-            current_nodes[j] = desert_map[node][0]
+            current_node = desert_map[current_node][0]
         else:
-            current_nodes[j] = desert_map[node][1]
-        if current_nodes[j][2] != 'Z':
-            at_destination = False
+            current_node = desert_map[current_node][1]
+        num_steps += 1
+        # Loop to instruction start, if necessary
+        ins_idx = (ins_idx + 1) % len(instructions)
 
-    # Prepare for next loop
-    num_steps += 1
-    i += 1
-    if i == len(instructions):
-        i = 0
+    step_counts.append(num_steps)
 
 # Display total steps required
-print(num_steps)
+steps_required = np.lcm.reduce(step_counts)
+print(steps_required)
