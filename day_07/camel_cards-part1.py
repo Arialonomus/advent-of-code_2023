@@ -94,8 +94,10 @@ def is_stronger(hand_a, hand_b):
             return False
 
 def sort_by_strength(games):
-    """Takes in an unordered list of games (hands, bids) of the same type
-    and returns the list sorted from weakest to strongest hand"""
+    """
+    Takes in an unordered list of games (hands, bids) of the same type
+    and returns the list sorted from weakest to strongest hand
+    """
     for i in range(len(games) - 1):
         # Locate the index of the weakest hand in the sub array
         weakest = i
@@ -124,8 +126,8 @@ with args.input_file as file:
 games_by_type = [[] for _ in range(NUM_TYPES)]
 for game in games:
     hand = game[0]
-    type = find_hand_type(hand)
-    games_by_type[type].append(game)
+    game_type = find_hand_type(hand)
+    games_by_type[game_type].append(game)
 
 # Sort all the hands of a given type by strength
 # then combine into a single list of games sorted by rank
