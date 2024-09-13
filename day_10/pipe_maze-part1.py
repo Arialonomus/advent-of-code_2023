@@ -12,7 +12,7 @@ args = get_args(10, "Pipe Maze (Part 1)")
 
 # Read in the map, preserving the starting position
 maze_map = []
-starting_pos = ()
+starting_position = ()
 with args.input_file as file:
     row = 0
     tile = file.read(1)
@@ -22,7 +22,7 @@ with args.input_file as file:
         while tile != '\n':
             maze_row.append(tile)
             if tile == 'S':
-                starting_pos = (row, col)
+                starting_position = (row, col)
             tile = file.read(1)
             col += 1
         maze_map.append(maze_row)
@@ -31,66 +31,67 @@ with args.input_file as file:
 
 # Construct parallel map for loop distances
 loop_distances = [[0] * len(maze_map[0]) for row in maze_map]
-loop_distances[starting_pos[0]][starting_pos[1]] = 'S'
+loop_distances[starting_position[0]][starting_position[1]] = 'S'
 
-def get_valid_moves(maze_map, position):
+def get_valid_moves(maze_map, position, previous=()):
     """Returns a list of valid moves for the given position"""
-    row = position[0]
-    col = position[1]
-    current_tile = maze_map[row][col]
+    cur_row = position[0]
+    cur_col = position[1]
+    current_tile = maze_map[cur_row][cur_col]
     valid_moves = []
 
     # Check north cell
     if (current_tile in ['S', '|', 'L', 'J']
-            and row > 0
-            and maze_map[row - 1][col] in ['|', 'F', '7']):
-        valid_moves.append((row - 1, col))
+            and cur_row > 0
+            and maze_map[cur_row - 1][cur_col] in ['|', 'F', '7']):
+        valid_moves.append((cur_row - 1, cur_col))
 
     # Check east cell
     if (current_tile in ['S', '-', 'L', 'F']
-            and col < len(maze_map[0]) - 1
-            and maze_map[row][col + 1] in ['-', 'J', '7']):
-        valid_moves.append((row, col + 1))
+            and cur_col < len(maze_map[0]) - 1
+            and maze_map[cur_row][cur_col + 1] in ['-', 'J', '7']):
+        valid_moves.append((cur_row, cur_col + 1))
 
     # Check south cell
     if (current_tile in ['S', '|', '7', 'F'] and
-            row < len(maze_map) - 1
-            and maze_map[row + 1][col] in ['|', 'J', 'L']):
-        valid_moves.append((row + 1, col))
+            cur_row < len(maze_map) - 1
+            and maze_map[cur_row + 1][cur_col] in ['|', 'J', 'L']):
+        valid_moves.append((cur_row + 1, cur_col))
 
     # Check west cell
     if (current_tile in ['S', '-', '7', 'J'] and
-            col > 0
-            and maze_map[row][col - 1] in ['-', 'F', 'L']):
-        valid_moves.append((row, col - 1))
+            cur_col > 0
+            and maze_map[cur_row][cur_col - 1] in ['-', 'F', 'L']):
+        valid_moves.append((cur_row, cur_col - 1))
+
+    # Discard previous position to avoid backtracking
+    if previous in valid_moves:
+        valid_moves.remove(previous)
 
     return valid_moves
 
-# Traverse the loop with 2 actors until loop is mapped
+
+# Determine the valid starting paths and create actors for each
+current_positions = get_valid_moves(maze_map, starting_position)
+num_actors = len(current_positions)
+prev_positions = [starting_position] * num_actors
+
+# Traverse the loop with actors until farthest distance is mapped
 distance = 0
 loop_complete = False
-actor_a_pos, actor_b_pos = get_valid_moves(maze_map, starting_pos)
 while not loop_complete:
     distance += 1
-
-    # Actor A
-    loop_distances[actor_a_pos[0]][actor_a_pos[1]] = distance
-    actor_a_moves = get_valid_moves(maze_map, actor_a_pos)
-    if loop_distances[actor_a_moves[0][0]][actor_a_moves[0][1]] == 0:
-        actor_a_pos = actor_a_moves[0]
-    else:
-        actor_a_pos = actor_a_moves[1]
-
-    # Actor B
-    if loop_distances[actor_b_pos[0]][actor_b_pos[1]] != 0:
-        loop_complete = True
-    else:
-        loop_distances[actor_b_pos[0]][actor_b_pos[1]] = distance
-        actor_b_moves = get_valid_moves(maze_map, actor_b_pos)
-        if loop_distances[actor_b_moves[0][0]][actor_b_moves[0][1]] == 0:
-            actor_b_pos = actor_b_moves[0]
+    for i in range(num_actors):
+        x = current_positions[i][0]
+        y = current_positions[i][1]
+        if loop_distances[x][y] != 0:
+            loop_complete = True
         else:
-            actor_b_pos = actor_b_moves[1]
+            loop_distances[x][y] = distance
+            next_moves = get_valid_moves(maze_map, current_positions[i], prev_positions[i])
+            prev_positions[i] = current_positions[i]
+            # Because path is a loop, each actor will only have one valid move
+            current_positions[i] = next_moves[0]
 
 # Display final distance
 print(distance)
