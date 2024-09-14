@@ -39,3 +39,11 @@ for y in range(len(galaxy_map)):
     for x in columns:
         galaxy_coordinates.append((x, y))
 galaxy_pairs = list(combinations(galaxy_coordinates, 2))
+
+# Calculate and display the sum of the distances between each galaxy
+sum_distances = 0
+for pair in galaxy_pairs:
+    galaxy_a, galaxy_b = pair[0], pair[1]
+    distance = abs(galaxy_b[0] - galaxy_a[0]) + abs(galaxy_b[1] - galaxy_a[1])
+    sum_distances += distance
+print(sum_distances)
