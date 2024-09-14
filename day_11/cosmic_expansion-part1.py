@@ -25,12 +25,10 @@ with args.input_file as file:
         galaxy_map.append(list(line.strip()))
 
 # Expand the galaxy map horizontally by doubling the columns without galaxies
-empty_cols = set(range(len(galaxy_map[0]))).difference(galaxy_cols)
+empty_cols = sorted(list(set(range(len(galaxy_map[0]))).difference(galaxy_cols)))
 for row in galaxy_map:
-    i = 0
-    for index in empty_cols:
-        row.insert(index + i, '.')
-        i += 1
+    for i in range(len(empty_cols)):
+        row.insert(empty_cols[i] + i, '.')
 
 # Get the coordinates for each galaxy and build a list of pairs
 galaxy_coordinates = []
