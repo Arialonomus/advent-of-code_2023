@@ -29,9 +29,11 @@ with args.input_file as file:
         row += 1
         tile = file.read(1)
 
-# Construct parallel map for loop enclosures
-enclosure_map = [['.'] * len(maze_map[0]) for row in maze_map]
-enclosure_map[starting_position[0]][starting_position[1]] = 'S'
+# Construct parallel map for loop enclosures with additional 1 tile border
+num_puzzle_rows = len(maze_map)
+num_puzzle_cols = len(maze_map[0])
+enclosure_map = [['.'] * (num_puzzle_cols + 2) for row in range(num_puzzle_rows + 2)]
+enclosure_map[starting_position[0] + 1][starting_position[1] + 1] = 'S'
 
 def get_valid_moves(maze_map, position, previous=()):
     """Returns a list of valid moves for the given position"""
@@ -82,11 +84,40 @@ while not loop_complete:
     for i in range(num_actors):
         x = current_positions[i][0]
         y = current_positions[i][1]
-        if enclosure_map[x][y] != '.':
+        if enclosure_map[x + 1][y + 1] != '.':
             loop_complete = True
         else:
-            enclosure_map[x][y] = maze_map[x][y]
+            enclosure_map[x + 1][y + 1] = maze_map[x][y]
             next_moves = get_valid_moves(maze_map, current_positions[i], prev_positions[i])
             prev_positions[i] = current_positions[i]
             # Because path is a loop, each actor will only have one valid move
             current_positions[i] = next_moves[0]
+
+# Expand the enclosure map and copy the enclosure map over
+expanded_enclosure_map = [['#'] * (2 * (num_puzzle_cols + 2)) for row in range(2 * (num_puzzle_rows + 2))]
+for i in range(len(enclosure_map)):
+    for j in range(len(enclosure_map[0])):
+        tile = enclosure_map[i][j]
+        expanded_enclosure_map[i * 2][j * 2] = tile
+        match tile:
+            case 'F':
+                expanded_enclosure_map[(i * 2) + 1][(j * 2)] = '|'
+                expanded_enclosure_map[(i * 2)][(j * 2) + 1] = '-'
+            case '7':
+                expanded_enclosure_map[(i * 2) + 1][(j * 2)] = '|'
+                expanded_enclosure_map[(i * 2)][(j * 2) - 1] = '-'
+            case 'J':
+                expanded_enclosure_map[(i * 2) - 1][(j * 2)] = '|'
+                expanded_enclosure_map[(i * 2)][(j * 2) - 1] = '-'
+            case 'L':
+                expanded_enclosure_map[(i * 2) - 1][(j * 2)] = '|'
+                expanded_enclosure_map[(i * 2)][(j * 2) + 1] = '-'
+            case '|':
+                expanded_enclosure_map[(i * 2) - 1][(j * 2)] = '|'
+                expanded_enclosure_map[(i * 2) + 1][(j * 2)] = '|'
+            case '-':
+                expanded_enclosure_map[(i * 2)][(j * 2) - 1] = '-'
+                expanded_enclosure_map[(i * 2)][(j * 2) + 1] = '-'
+
+for line in expanded_enclosure_map:
+    print(''.join(line))
