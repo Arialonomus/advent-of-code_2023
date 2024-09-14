@@ -36,7 +36,9 @@ enclosure_map = [['.'] * (num_puzzle_cols + 2) for row in range(num_puzzle_rows 
 enclosure_map[starting_position[0] + 1][starting_position[1] + 1] = 'S'
 
 def get_valid_moves(maze_map, position, previous=()):
-    """Returns a list of valid moves for the given position"""
+    """
+    Returns a list of valid moves for the given position
+    """
     cur_row = position[0]
     cur_col = position[1]
     current_tile = maze_map[cur_row][cur_col]
@@ -93,7 +95,7 @@ while not loop_complete:
             # Because path is a loop, each actor will only have one valid move
             current_positions[i] = next_moves[0]
 
-# Expand the enclosure map and copy the enclosure map over
+# Expand the enclosure map while maintaining the loop
 expanded_enclosure_map = [['#'] * (2 * (num_puzzle_cols + 2)) for row in range(2 * (num_puzzle_rows + 2))]
 for i in range(len(enclosure_map)):
     for j in range(len(enclosure_map[0])):
@@ -119,5 +121,50 @@ for i in range(len(enclosure_map)):
                 expanded_enclosure_map[(i * 2)][(j * 2) - 1] = '-'
                 expanded_enclosure_map[(i * 2)][(j * 2) + 1] = '-'
 
-for line in expanded_enclosure_map:
-    print(''.join(line))
+def mark_outside_tiles(expanded_enclosure_map, row, col):
+    """
+    Marks the outside tiles of the enclosure map using a span fill algorithm.
+    Algorithm adapted from Glassner's optimized algorithm, presented in pseudocode
+    at https://en.wikipedia.org/wiki/Flood_fill
+    """
+
+    def outside(row, col):
+        """
+        Helper function to determine if tile is an outside tile
+        """
+        height = len(expanded_enclosure_map)
+        width = len(expanded_enclosure_map[0])
+        return 0 <= row < height and 0 <= col < width and expanded_enclosure_map[row][col] in ['.', '#']
+
+    if not outside(row, col):
+        return expanded_enclosure_map
+    queue = [(col, col, row, 1), (col, col, row - 1, -1)]
+    while queue:
+        entry = queue.pop(0)
+        x1, x2, y, dy = entry
+        x = x1
+        if outside(y, x):
+            while outside(y, x - 1):
+                expanded_enclosure_map[y][x - 1] = 'O'
+                x -= 1
+            if x < x1:
+                queue.append((x, x1 - 1, y - dy, -dy))
+        while x1 <= x2:
+            while outside(y, x1):
+                expanded_enclosure_map[y][x1] = 'O'
+                x1 += 1
+            if x1 > x:
+                queue.append((x, x1 - 1, y + dy, dy))
+            if x1 - 1 > x2:
+                queue.append((x2 + 1, x1 - 1, y - dy, -dy))
+            x1 += 1
+            while x1 < x2 and not outside(y, x1):
+                x1 += 1
+            x = x1
+    return expanded_enclosure_map
+
+
+# Mark the outside tiles on the expanded enclosure map and count enclosed tiles
+expanded_enclosure_map = mark_outside_tiles(expanded_enclosure_map, 0, 0)
+num_enclosed = sum(row.count('.') for row in expanded_enclosure_map)
+print(num_enclosed)
