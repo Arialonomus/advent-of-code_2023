@@ -31,3 +31,11 @@ for row in galaxy_map:
     for index in empty_cols:
         row.insert(index + i, '.')
         i += 1
+
+# Get the coordinates for each galaxy and build a list of pairs
+galaxy_coordinates = []
+for y in range(len(galaxy_map)):
+    columns = [i for i, c in enumerate(galaxy_map[y]) if c == '#']
+    for x in columns:
+        galaxy_coordinates.append((x, y))
+galaxy_pairs = list(combinations(galaxy_coordinates, 2))
