@@ -1,6 +1,6 @@
 """
 Advent of Code 2023
-Day 15 - Lens Library (Part 1)
+Day 15 - Lens Library (Part 2)
 
 Solution by Jacob Barber
 """
