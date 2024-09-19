@@ -19,8 +19,8 @@ with args.input_file as file:
 
 def get_open_ranges(schematic):
     """
-    Determines the open ranges for the rightward tilt direction of a
-    passed in schematic.
+    Calculates the range(s) of open cells for each row in the passed-in schematic.
+    Assumes the schematic is oriented with the tilt direction towards the right
     """
     open_ranges = []
     for row in schematic:
@@ -30,12 +30,15 @@ def get_open_ranges(schematic):
         for i in range(row.size):
             if row[i] == '#':
                 if range_started:
+                    # Denotes the leftmost boundary of one or more cubes
                     row_ranges.append((start, i))
                     range_started = False
             elif not range_started:
+                # Begin tracking an open range
                 start = i
                 range_started = True
         if range_started:
+            # Row ends at grid boundary
             row_ranges.append((start, row.size))
         open_ranges.append(row_ranges)
 
@@ -94,7 +97,7 @@ while cycle < NUM_CYCLES and not pattern_found:
         memo[prev_schematic.tobytes()] = current_schematic.copy()
     cycle += 1
 
-# Determine the index of the final cycle
+# Determine the output of the final cycle from the pattern list
 final_output_index = ((NUM_CYCLES - cycle) % len(output_pattern)) + 1
 final_output = output_pattern[final_output_index]
 
