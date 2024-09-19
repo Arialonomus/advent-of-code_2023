@@ -37,6 +37,7 @@ def get_lens_position(box, lens_label):
 
 # Place the lenses in their respective boxes per the initialization sequence
 lens_boxes = [[] for _ in range(NUM_BOXES)]
+highest_box_num = 0
 for step in initialization_sequence:
     if step[-1] == '-':
         # Remove a lens
@@ -57,3 +58,18 @@ for step in initialization_sequence:
         else:
             # Add the lens to the end of the row
             lens_boxes[box_num].append((label, focal_length))
+            if box_num > highest_box_num:
+                highest_box_num = box_num
+
+# Calculate the total focusing power of all the lenses
+total_focusing_power = 0
+for num in range(highest_box_num + 1):
+    box = lens_boxes[num]
+    if box:
+        lens_count = len(box)
+        for lens in range(lens_count):
+            box_pos = num + 1
+            slot_num = lens + 1
+            focal_length = box[lens][1]
+            total_focusing_power += box_pos * slot_num * focal_length
+print(total_focusing_power)
