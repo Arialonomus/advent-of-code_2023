@@ -5,6 +5,9 @@ Day 12 - Hot Springs (Part 2)
 Solution by Jacob Barber
 """
 
+import math
+import operator
+from functools import reduce
 from aoc_utils import get_args
 
 UNFOLD_FACTOR = 5
@@ -12,63 +15,88 @@ UNFOLD_FACTOR = 5
 # Parse arguments
 args = get_args(12, "Hot Springs (Part 2)")
 
-# Read in spring rows and damaged group parts
+spring_rows = []
+with args.input_file as file:
+    for line in file:
+        spring_row, damaged_count = line.strip().split()
+        spring_rows.append((list(spring_row), list(map(int, damaged_count.split(',')))))
+
+"""# Read in spring rows and damaged group parts
 spring_rows = []
 with args.input_file as file:
     for line in file:
         spring_row, damaged_count = line.strip().split()
         spring_row_unfolded = '?'.join([spring_row] * UNFOLD_FACTOR)
         damaged_count_unfolded = ','.join([damaged_count] * UNFOLD_FACTOR)
-        spring_rows.append((list(spring_row_unfolded), list(map(int, damaged_count_unfolded.split(',')))))
+        spring_rows.append((list(spring_row_unfolded), list(map(int, damaged_count_unfolded.split(',')))))"""
 
-def num_valid_arrangements(layout, current, counts):
-    """
-    Recursively calculate the number of valid arrangements of broken spring groups
-    for a given row based on the spring counts for each contiguous group.
-    """
-    while current < len(layout):
-        match layout[current]:
-            case '#':
-                if counts:
-                    # Add this spring to the current grouping
-                    counts[0] -= 1
-                if not counts or counts[0] < 0:
-                    # There are no remaining groupings or this grouping is too large
-                    return 0
+def count_valid_arrangements(layout, counts):
+
+    row_len = len(layout)
+    num_groups = len(counts)
+    permutation_counts = [1] * num_groups
+    spring = 0
+    group = 0
+    while spring < row_len and group < num_groups:
+        match layout[spring]:
             case '.':
-                if counts:
-                    # There are some groupings remaining
-                    if counts[0] == 0:
-                        # This spring denotes the end of a broken group
-                        counts.pop(0)
-                    elif current > 0 and layout[current - 1] == '#':
-                        # The current grouping is too small
-                        return 0
+                if counts[group] == 0:
+                    group += 1
+                spring += 1
+            case '#':
+                while counts[group] > 0 and spring < row_len and layout[spring] != '.':
+                    counts[group] -= 1
+                    spring += 1
             case '?':
-                num_valid = 0
-                if counts and counts[0] != 0:
-                    # This space could fit a broken spring
-                    row_with_broken = layout.copy()
-                    row_with_broken[current] = '#'
-                    num_valid += num_valid_arrangements(row_with_broken, current, counts.copy())
-                # This space must be a working spring
-                row_with_working = layout.copy()
-                row_with_working[current] = '.'
-                num_valid += num_valid_arrangements(row_with_working, current, counts.copy())
+                if counts[group] == 0:
+                    group += 1
+                    spring += 1
+                else:
+                    # Get the length of the unknown group
+                    end = spring
+                    while end < row_len and layout[end] == '?':
+                        end += 1
+                    unknown_len = end - spring
 
-                # Return the valid permutations emerging from this tile
-                return num_valid
-        # Move to the next space
-        current += 1
+                    if end == row_len or layout[end] == '.':
+                        # Grouping is all broken springs, only one possible permutation
+                        if unknown_len == counts[group]:
+                            group += 1
 
-    if not counts or counts == [0]:
-        return 1
-    else:
-        return 0
+                        # Calculate number of unique permutations for this unknown group
+                        elif unknown_len > counts[group]:
+                            # Determine how many broken groups can be contained in this unknown group
+                            total_len = counts[group]
+                            group_end = group + 1
+                            while group_end < num_groups and unknown_len > total_len + counts[group_end]:
+                                total_len += counts[group_end]
+                                group_end += 1
+
+                            # Calculate permutations as a stars and bars problem
+                            num_counts = group_end - group
+                            empty_count = unknown_len - total_len - (num_counts - 1)
+                            num_permutations = math.comb(empty_count + num_counts, num_counts)
+                            permutation_counts[group_end - 1] = num_permutations
+                            group = group_end
+                        spring = end
+
+                    elif layout[end] == '#':
+                        num_broken = unknown_len
+                        while end < row_len and layout[end] == '#':
+                            num_broken += 1
+                            end += 1
+                        if num_broken <= counts[group]:
+                            counts[group] -= num_broken
+                            spring = end
+                        else:
+                            spring += 1
+
+    return reduce(operator.mul, permutation_counts)
+
 
 # Calculate and display the sum of valid permutations for all rows
 sum_valid_arrangements = 0
 for row in spring_rows:
     spring_layout, grouping_counts = row
-    sum_valid_arrangements += num_valid_arrangements(spring_layout, 0, grouping_counts)
+    sum_valid_arrangements += count_valid_arrangements(spring_layout, grouping_counts)
 print(sum_valid_arrangements)
