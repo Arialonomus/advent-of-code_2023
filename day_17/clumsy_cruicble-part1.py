@@ -22,7 +22,7 @@ with args.input_file as file:
 def find_minimal_path(heat_map, start_pos, goal_pos):
     """
     Find the path with the smallest heat loss using a modified
-    Dijkstra's algorithm
+    Dijkstra's algorithm with directional states.
     """
 
     height, width = heat_map.shape
@@ -49,7 +49,8 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
 
         return ()
 
-    heat_loss = np.array([[INF_INT] * width for _ in range(height)])
+    heat_loss = np.full((height, width, 4), INF_INT)
+    direction_map = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
     priority_queue = []
     start_directions = ['N', 'E', 'S', 'W']
 
@@ -58,34 +59,26 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
         next_pos = get_tile_position(start_pos, start_dir)
         if next_pos:
             next_row, next_col = next_pos
-            heat_loss[next_row][next_col] = heat_map[next_row][next_col]
-            heapq.heappush(priority_queue, (heat_map[next_row][next_col], next_pos, start_dir, 1))
+            dir_index = direction_map[start_dir]
+            heat_loss[next_row][next_col][dir_index] = heat_map[next_row][next_col]
+            heapq.heappush(priority_queue, (heat_map[next_row][next_col], next_pos, dir_index, 1))
 
     # Direction dictionaries
-    left = {
-        'N': 'W',
-        'E': 'N',
-        'S': 'E',
-        'W': 'S'
-    }
-    right = {
-        'N': 'E',
-        'E': 'S',
-        'S': 'W',
-        'W': 'N'
-    }
+    left = { 'N': 'W', 'E': 'N', 'S': 'E', 'W': 'S' }
+    right = { 'N': 'E', 'E': 'S', 'S': 'W', 'W': 'N' }
 
     while priority_queue:
         # Check the tile with the lowest heat loss in the priority queue
-        current_heat_loss, current_pos, current_dir, current_num_blocks = heapq.heappop(priority_queue)
+        current_heat_loss, current_pos, current_dir_index, current_num_blocks = heapq.heappop(priority_queue)
 
         # If we've reached the end we can stop early
         if current_pos == goal_pos:
-            return heat_loss[goal_pos[0]][goal_pos[1]]
+            return current_heat_loss
 
         # Build the list of directions to explore
+        current_dir = list(direction_map.keys())[current_dir_index]
         directions = [left[current_dir], right[current_dir]]
-        if current_num_blocks < MAX_NUM_BLOCKS:
+        if current_num_blocks <= MAX_NUM_BLOCKS:
             directions.append(current_dir)
 
         # Explore the valid directions
@@ -94,14 +87,15 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
             if next_pos:
                 next_row, next_col = next_pos
                 new_heat_loss = current_heat_loss + heat_map[next_row][next_col]
+                next_dir_index = direction_map[next_dir]
 
-                if new_heat_loss < heat_loss[next_row][next_col]:
+                if new_heat_loss < heat_loss[next_row][next_col][next_dir_index]:
                     # If a more minimal path to the neighbor is found, update it
-                    heat_loss[next_row][next_col] = new_heat_loss
+                    heat_loss[next_row][next_col][next_dir_index] = new_heat_loss
                     new_num_blocks = current_num_blocks + 1 if next_dir == current_dir else 1
-                    heapq.heappush(priority_queue, (new_heat_loss, next_pos, next_dir, new_num_blocks))
+                    heapq.heappush(priority_queue, (new_heat_loss, next_pos, next_dir_index, new_num_blocks))
 
-    return heat_loss[goal_pos[0]][goal_pos[1]]
+    return INF_INT
 
 # Find the minimal path from the top-left to bottom-right tiles
 start = (0, 0)
