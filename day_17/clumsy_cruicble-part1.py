@@ -90,12 +90,10 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
                 next_dir_index = direction_map[next_dir]
                 new_num_blocks = current_num_blocks + 1 if next_dir == current_dir else 0
 
+                # If a more minimal path to the neighbor is found, update it
                 if new_heat_loss < heat_loss[next_row][next_col][next_dir_index][new_num_blocks]:
-                    # If a more minimal path to the neighbor is found, update it
                     heat_loss[next_row][next_col][next_dir_index][new_num_blocks] = new_heat_loss
                     heapq.heappush(priority_queue, (new_heat_loss, next_pos, next_dir_index, new_num_blocks))
-
-    return INF_INT
 
 # Find the minimal path from the top-left to bottom-right tiles
 start = (0, 0)
