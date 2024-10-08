@@ -51,7 +51,7 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
         return ()
 
     heat_loss = np.full((height, width, 4, MAX_NUM_BLOCKS), INF_INT)
-    direction_map = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+    direction_map = { 'N': 0, 'E': 1, 'S': 2, 'W': 3, 0: 'N', 1: 'E', 2: 'S', 3: 'W' }
     priority_queue = []
     start_directions = ['N', 'E', 'S', 'W']
 
@@ -77,7 +77,7 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
             return current_heat_loss
 
         # Build the list of directions to explore
-        current_dir = list(direction_map.keys())[current_dir_index]
+        current_dir = direction_map[current_dir_index]
         directions = []
         if current_num_blocks >= MIN_NUM_BLOCKS - 1:
             directions = [left[current_dir], right[current_dir]]
