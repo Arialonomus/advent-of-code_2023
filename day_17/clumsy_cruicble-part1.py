@@ -49,7 +49,7 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
 
         return ()
 
-    heat_loss = np.full((height, width, 4), INF_INT)
+    heat_loss = np.full((height, width, 4, MAX_NUM_BLOCKS), INF_INT)
     direction_map = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
     priority_queue = []
     start_directions = ['N', 'E', 'S', 'W']
@@ -60,8 +60,8 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
         if next_pos:
             next_row, next_col = next_pos
             dir_index = direction_map[start_dir]
-            heat_loss[next_row][next_col][dir_index] = heat_map[next_row][next_col]
-            heapq.heappush(priority_queue, (heat_map[next_row][next_col], next_pos, dir_index, 1))
+            heat_loss[next_row][next_col][dir_index][0] = heat_map[next_row][next_col]
+            heapq.heappush(priority_queue, (heat_map[next_row][next_col], next_pos, dir_index, 0))
 
     # Direction dictionaries
     left = { 'N': 'W', 'E': 'N', 'S': 'E', 'W': 'S' }
@@ -78,7 +78,7 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
         # Build the list of directions to explore
         current_dir = list(direction_map.keys())[current_dir_index]
         directions = [left[current_dir], right[current_dir]]
-        if current_num_blocks <= MAX_NUM_BLOCKS:
+        if current_num_blocks < MAX_NUM_BLOCKS - 1:
             directions.append(current_dir)
 
         # Explore the valid directions
@@ -88,11 +88,11 @@ def find_minimal_path(heat_map, start_pos, goal_pos):
                 next_row, next_col = next_pos
                 new_heat_loss = current_heat_loss + heat_map[next_row][next_col]
                 next_dir_index = direction_map[next_dir]
+                new_num_blocks = current_num_blocks + 1 if next_dir == current_dir else 0
 
-                if new_heat_loss < heat_loss[next_row][next_col][next_dir_index]:
+                if new_heat_loss < heat_loss[next_row][next_col][next_dir_index][new_num_blocks]:
                     # If a more minimal path to the neighbor is found, update it
-                    heat_loss[next_row][next_col][next_dir_index] = new_heat_loss
-                    new_num_blocks = current_num_blocks + 1 if next_dir == current_dir else 1
+                    heat_loss[next_row][next_col][next_dir_index][new_num_blocks] = new_heat_loss
                     heapq.heappush(priority_queue, (new_heat_loss, next_pos, next_dir_index, new_num_blocks))
 
     return INF_INT
