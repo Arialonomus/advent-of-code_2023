@@ -71,3 +71,52 @@ lagoon_map = np.full((height, width), '.')
 start = (height + bottom - 1, width - right - 1)
 draw_trench(lagoon_map, dig_plan, start)
 
+def span_fill(grid, row, col):
+    """
+    Fill the inside the outline using a span fill algorithm.
+    Algorithm adapted from Glassner's optimized algorithm, presented in pseudocode
+    at https://en.wikipedia.org/wiki/Flood_fill
+    """
+
+    grid_height, grid_width = grid.shape
+
+    def inside(cur_row, cur_col):
+        """
+        Helper function to determine if tile is an inside tile
+        """
+        return 0 <= cur_row < grid_height and 0 <= cur_col < grid_width and grid[cur_row][cur_col] == '.'
+
+    # Early return if the tile is not inside the outline
+    if not inside(row, col):
+        return grid
+
+    queue = [(col, col, row, 1), (col, col, row - 1, -1)]
+    while queue:
+        entry = queue.pop(0)
+        x1, x2, y, dy = entry
+        x = x1
+        if inside(y, x):
+            while inside(y, x - 1):
+                grid[y][x - 1] = '#'
+                x -= 1
+            if x < x1:
+                queue.append((x, x1 - 1, y - dy, -dy))
+        while x1 <= x2:
+            while inside(y, x1):
+                grid[y][x1] = '#'
+                x1 += 1
+            if x1 > x:
+                queue.append((x, x1 - 1, y + dy, dy))
+            if x1 - 1 > x2:
+                queue.append((x2 + 1, x1 - 1, y - dy, -dy))
+            x1 += 1
+            while x1 < x2 and not inside(y, x1):
+                x1 += 1
+            x = x1
+    return grid
+
+# Fill the trench and count the number of filled tiles
+start_row, start_col = start
+span_fill(lagoon_map, start_row + 1, start_col + 1)
+num_filled_tiles = np.count_nonzero(lagoon_map == '#')
+print(num_filled_tiles)
