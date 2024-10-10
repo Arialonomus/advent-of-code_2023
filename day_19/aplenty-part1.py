@@ -43,4 +43,43 @@ for line in workflow_lines:
 parts = []
 for line in part_rating_lines:
     ratings = line[1:-1].split(',')
-    parts.append(tuple(int(rating[2:]) for rating in ratings))
+    part_dictionary = {
+        'x': int(ratings[0][2:]),
+        'm': int(ratings[1][2:]),
+        'a': int(ratings[2][2:]),
+        's': int(ratings[3][2:])
+    }
+    parts.append(part_dictionary)
+
+# Determine the accepted parts based on the ratings and workflows
+sum_accepted_parts = 0
+for part in parts:
+    target_rule = 'in' # Always begin with the rule 'in'
+
+    # Move through workflows until a part is accepted or rejected
+    while target_rule not in ['R', 'A']:
+        # Get the rules for this workflow
+        rules_list, default_rule = workflows[target_rule]
+
+        # Iterate through rules until a match is found
+        num_rules = len(rules_list)
+        match_found = False
+        i = 0
+        while i < num_rules and not match_found:
+            rule_category, comparison_function, comparison_value, target_if_true = rules_list[i]
+            test_value = part[rule_category]
+            if comparison_function(test_value, comparison_value):
+                target_rule = target_if_true
+                match_found = True
+            i += 1
+
+        # Use the default destination if no match was found
+        if not match_found:
+            target_rule = default_rule
+
+    # Add the accepted part ratings to the sum
+    if target_rule == 'A':
+        sum_accepted_parts += sum(part.values())
+
+# Print the final sum of the ratings of accepted parts
+print(sum_accepted_parts)
